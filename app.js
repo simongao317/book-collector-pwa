@@ -23,6 +23,7 @@ let editingBookId = null;
 let coverDraft = "";
 let scanStream = null;
 let scanTimer = null;
+let zxingControls = null;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -385,8 +386,14 @@ async function handleISBN(isbn) {
 async function startScan() {
   $("#scanDialog").showModal();
   $("#scanStatus").textContent = "请把 ISBN 条码或二维码对准摄像头。";
+
+  if (window.ZXingBrowser?.BrowserMultiFormatReader) {
+    await startZXingScan();
+    return;
+  }
+
   if (!("BarcodeDetector" in window)) {
-    $("#scanStatus").textContent = "当前浏览器不支持直接扫码，请在下方手动输入 ISBN。";
+    $("#scanStatus").textContent = "当前浏览器暂时不能直接扫码，请在下方手动输入 ISBN。";
     return;
   }
   try {
@@ -406,7 +413,26 @@ async function startScan() {
   }
 }
 
+async function startZXingScan() {
+  try {
+    const video = $("#scanVideo");
+    const codeReader = new window.ZXingBrowser.BrowserMultiFormatReader();
+    zxingControls = await codeReader.decodeFromVideoDevice(undefined, video, (result) => {
+      if (!result) return;
+      const value = normalizeISBN(result.getText ? result.getText() : result.text);
+      if (value.length === 10 || value.length === 13) {
+        handleISBN(value);
+      }
+    });
+    $("#scanStatus").textContent = "请把 ISBN 条码或二维码放进画面中央。";
+  } catch (error) {
+    $("#scanStatus").textContent = `无法使用摄像头：${error.message}。请手动输入 ISBN。`;
+  }
+}
+
 function stopScan() {
+  if (zxingControls) zxingControls.stop();
+  zxingControls = null;
   if (scanTimer) window.clearInterval(scanTimer);
   scanTimer = null;
   if (scanStream) scanStream.getTracks().forEach((track) => track.stop());
