@@ -151,6 +151,15 @@
       </div>
     </dialog>
 
+    <dialog id="choiceDialog" class="sheet choice-sheet">
+      <div class="dialog-header compact-header">
+        <span></span>
+        <h2 id="choiceTitle">选择</h2>
+        <button id="cancelChoiceButton">取消</button>
+      </div>
+      <div id="choiceOptions" class="choice-options"></div>
+    </dialog>
+
     <template id="bookCardTemplate">
       <article class="book-card">
         <button class="cover-button">
@@ -174,7 +183,7 @@
       </article>
     </template>
 
-    <script src="https://unpkg.com/@zxing/browser@latest"></script>
+    <script src="vendor/zxing-browser.min.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -24,6 +24,7 @@ let coverDraft = "";
 let scanStream = null;
 let scanTimer = null;
 let zxingControls = null;
+let choiceResolve = null;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -246,8 +247,8 @@ function renderBooks() {
 }
 
 async function changeOwnership(book) {
-  const next = prompt("请输入状态：已买 或 未买", book.ownershipStatus);
-  if (!next || !["已买", "未买"].includes(next)) return;
+  const next = await chooseOption("收藏状态", ["已买", "未买"], book.ownershipStatus);
+  if (!next) return;
   const updated = { ...book, ownershipStatus: next };
   if (next === "已买") updated.ownedReadingStatus = "未读";
   if (next === "未买") updated.wishlistReadingStatus = "想读";
@@ -259,12 +260,10 @@ async function changeOwnership(book) {
 }
 
 async function changeReading(book) {
-  const options = book.ownershipStatus === "已买" ? "已读 或 未读" : "已读、想读 或 待定";
   const current = book.ownershipStatus === "已买" ? book.ownedReadingStatus : book.wishlistReadingStatus;
-  const next = prompt(`请输入阅读标签：${options}`, current);
+  const choices = book.ownershipStatus === "已买" ? ["已读", "未读"] : ["已读", "想读", "待定"];
+  const next = await chooseOption("阅读标签", choices, current);
   if (!next) return;
-  if (book.ownershipStatus === "已买" && !["已读", "未读"].includes(next)) return;
-  if (book.ownershipStatus === "未买" && !["已读", "想读", "待定"].includes(next)) return;
   const updated = { ...book };
   if (book.ownershipStatus === "已买") updated.ownedReadingStatus = next;
   else updated.wishlistReadingStatus = next;
@@ -273,6 +272,27 @@ async function changeReading(book) {
   } catch (error) {
     alert(error.message);
   }
+}
+
+function chooseOption(title, options, current) {
+  $("#choiceTitle").textContent = title;
+  const container = $("#choiceOptions");
+  container.innerHTML = "";
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.className = `choice-option${option === current ? " active" : ""}`;
+    button.textContent = option;
+    button.addEventListener("click", () => {
+      $("#choiceDialog").close();
+      if (choiceResolve) choiceResolve(option);
+      choiceResolve = null;
+    });
+    container.append(button);
+  });
+  $("#choiceDialog").showModal();
+  return new Promise((resolve) => {
+    choiceResolve = resolve;
+  });
 }
 
 function readFileAsDataURL(file) {
@@ -393,7 +413,7 @@ async function startScan() {
   }
 
   if (!("BarcodeDetector" in window)) {
-    $("#scanStatus").textContent = "当前浏览器暂时不能直接扫码，请在下方手动输入 ISBN。";
+    $("#scanStatus").textContent = "扫码组件还没加载完成。请刷新页面；如果仍不可用，请在下方手动输入 ISBN。";
     return;
   }
   try {
@@ -424,6 +444,7 @@ async function startZXingScan() {
         handleISBN(value);
       }
     });
+    scanStream = video.srcObject;
     $("#scanStatus").textContent = "请把 ISBN 条码或二维码放进画面中央。";
   } catch (error) {
     $("#scanStatus").textContent = `无法使用摄像头：${error.message}。请手动输入 ISBN。`;
@@ -616,6 +637,15 @@ function wireEvents() {
   });
   $("#scanDialog").addEventListener("close", stopScan);
   $("#manualIsbnButton").addEventListener("click", () => handleISBN($("#manualIsbnInput").value));
+  $("#cancelChoiceButton").addEventListener("click", () => {
+    $("#choiceDialog").close();
+    if (choiceResolve) choiceResolve(null);
+    choiceResolve = null;
+  });
+  $("#choiceDialog").addEventListener("close", () => {
+    if (choiceResolve) choiceResolve(null);
+    choiceResolve = null;
+  });
 }
 
 async function init() {

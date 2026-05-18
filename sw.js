@@ -1,9 +1,10 @@
-const CACHE_NAME = "book-collector-pwa-v1";
+const CACHE_NAME = "book-collector-pwa-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./vendor/zxing-browser.min.js",
   "./manifest.webmanifest",
   "./assets/icon-180.png",
   "./assets/icon-1024.png"

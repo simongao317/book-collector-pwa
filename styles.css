@@ -110,9 +110,9 @@ h1 {
 
 .book-card {
   display: grid;
-  grid-template-columns: 76px 1fr;
-  gap: 14px;
-  padding: 18px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
   border-radius: 26px;
   background: var(--card);
   box-shadow: 0 18px 40px rgba(28, 36, 60, 0.08);
@@ -120,8 +120,8 @@ h1 {
 
 .cover-button {
   align-self: center;
-  width: 70px;
-  height: 94px;
+  width: 60px;
+  height: 82px;
   padding: 0;
   border-radius: 8px;
   overflow: hidden;
@@ -152,7 +152,7 @@ h1 {
   background: transparent;
   color: var(--text);
   text-align: left;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 850;
   line-height: 1.25;
 }
@@ -178,13 +178,13 @@ h1 {
 .status-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   margin-top: 12px;
 }
 
 .status-chip {
-  min-width: 96px;
-  padding: 9px 14px;
+  min-width: 82px;
+  padding: 8px 10px;
   border-radius: 999px;
   background: #e9e9ec;
   color: var(--text);
@@ -205,16 +205,18 @@ h1 {
   display: grid;
   justify-items: end;
   gap: 2px;
-  min-width: 64px;
+  min-width: 48px;
+  max-width: 54px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
 .pending-days {
   color: var(--danger);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.1;
+  white-space: normal;
 }
 
 .searchbar {
@@ -309,6 +311,36 @@ hr {
 .form-sheet,
 .scan-sheet {
   margin: auto;
+}
+
+.choice-sheet {
+  margin: auto;
+  width: min(86vw, 380px);
+}
+
+.compact-header {
+  grid-template-columns: 64px 1fr 64px;
+}
+
+.choice-options {
+  display: grid;
+  gap: 10px;
+}
+
+.choice-option {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #f0f0f4;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.choice-option.active {
+  background: var(--accent);
+  color: white;
 }
 
 .dialog-header {
@@ -406,5 +438,36 @@ select {
   .app-shell {
     width: min(820px, 100%);
     margin: 0 auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-shell {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .book-card {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 10px;
+    padding: 13px;
+  }
+
+  .cover-button {
+    width: 54px;
+    height: 76px;
+  }
+
+  .book-title {
+    font-size: 19px;
+  }
+
+  .authors {
+    font-size: 16px;
+  }
+
+  .status-chip {
+    min-width: 72px;
+    padding: 8px 9px;
   }
 }
