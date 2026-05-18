@@ -1,0 +1,24 @@
+{
+  "name": "BookCollector",
+  "short_name": "藏书",
+  "description": "图书收藏管理 PWA",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6f6fb",
+  "theme_color": "#1c75ff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

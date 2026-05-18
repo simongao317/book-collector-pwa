@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1c75ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="藏书">
+    <title>BookCollector</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="assets/icon-180.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <button id="filterButton" class="round-button" aria-label="筛选">☰</button>
+        <div id="activeFilter" class="filter-pill" hidden>
+          <span id="activeFilterText">全部</span>
+          <button id="resetFilterButton">全部</button>
+        </div>
+        <div class="top-actions">
+          <button id="scanButton" class="round-button" aria-label="扫码">▣</button>
+          <button id="moreButton" class="round-button" aria-label="更多">•••</button>
+        </div>
+      </header>
+
+      <h1>藏书</h1>
+
+      <section id="bookList" class="book-list" aria-live="polite"></section>
+
+      <form id="searchForm" class="searchbar">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="搜索书名、作者、书号">
+      </form>
+    </main>
+
+    <dialog id="filterDialog" class="sheet small-sheet">
+      <form method="dialog">
+        <button class="sheet-close" aria-label="关闭">×</button>
+      </form>
+      <button class="menu-row" data-filter="all">全部 <span data-count="all">0</span></button>
+      <hr>
+      <p class="menu-label">已买</p>
+      <button class="menu-row prominent" data-filter="ownedAll">已买 <span data-count="ownedAll">0</span></button>
+      <button class="menu-row" data-filter="ownedRead">已买 · 已读 <span data-count="ownedRead">0</span></button>
+      <button class="menu-row" data-filter="ownedUnread">已买 · 未读 <span data-count="ownedUnread">0</span></button>
+      <hr>
+      <p class="menu-label">未买</p>
+      <button class="menu-row prominent" data-filter="wishlistAll">未买 <span data-count="wishlistAll">0</span></button>
+      <button class="menu-row" data-filter="wishlistRead">未买 · 已读 <span data-count="wishlistRead">0</span></button>
+      <button class="menu-row" data-filter="wishlistWantToRead">未买 · 想读 <span data-count="wishlistWantToRead">0</span></button>
+      <button class="menu-row" data-filter="wishlistPending">未买 · 待定 <span data-count="wishlistPending">0</span></button>
+    </dialog>
+
+    <dialog id="moreDialog" class="sheet small-sheet">
+      <form method="dialog">
+        <button class="sheet-close" aria-label="关闭">×</button>
+      </form>
+      <button id="manualAddButton" class="menu-row">手写录入</button>
+      <button id="importButton" class="menu-row">导入 CSV</button>
+      <button id="exportButton" class="menu-row">导出 CSV</button>
+      <input id="importFile" type="file" accept=".csv,text/csv" hidden>
+    </dialog>
+
+    <dialog id="bookDialog" class="sheet form-sheet">
+      <form id="bookForm">
+        <div class="dialog-header">
+          <button type="button" id="cancelBookButton">取消</button>
+          <h2 id="bookDialogTitle">录入图书</h2>
+          <button type="submit">保存</button>
+        </div>
+
+        <fieldset>
+          <legend>书号</legend>
+          <label>书号类型
+            <select name="identifierKind">
+              <option>ISBN</option>
+              <option>统一书号</option>
+              <option>自定义书号</option>
+            </select>
+          </label>
+          <label>ISBN <input name="isbn" autocomplete="off"></label>
+          <label>统一书号 <input name="unifiedNumber" autocomplete="off"></label>
+          <label>自定义书号 <input name="customNumber" autocomplete="off"></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>基本信息</legend>
+          <label>书名 <input name="title"></label>
+          <label>原名 <input name="originalTitle"></label>
+          <label>丛书名 <input name="seriesTitle"></label>
+          <label>作者 <input name="authors"></label>
+          <label>作者国籍 <input name="authorNationality"></label>
+          <label>出版时间 <input name="publicationDate"></label>
+          <label>出版社 <input name="publisher"></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>收藏状态</legend>
+          <label>状态
+            <select name="ownershipStatus">
+              <option>已买</option>
+              <option>未买</option>
+            </select>
+          </label>
+          <label>已买标签
+            <select name="ownedReadingStatus">
+              <option>已读</option>
+              <option>未读</option>
+            </select>
+          </label>
+          <label>未买标签
+            <select name="wishlistReadingStatus">
+              <option>已读</option>
+              <option>想读</option>
+              <option>待定</option>
+            </select>
+          </label>
+          <label>录入方式
+            <select name="entrySource">
+              <option>手写导入</option>
+              <option>扫码导入</option>
+              <option>CSV/Excel导入</option>
+            </select>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>封面照片</legend>
+          <img id="coverPreview" class="cover-preview" alt="">
+          <label class="file-label">选择照片
+            <input name="coverFile" type="file" accept="image/*">
+          </label>
+          <p class="hint">手写录入已买图书时必须添加封面照片。</p>
+        </fieldset>
+      </form>
+    </dialog>
+
+    <dialog id="scanDialog" class="sheet scan-sheet">
+      <div class="dialog-header">
+        <button id="cancelScanButton">取消</button>
+        <h2>扫码录入</h2>
+        <span></span>
+      </div>
+      <video id="scanVideo" playsinline muted></video>
+      <p id="scanStatus" class="hint">请把 ISBN 条码或二维码对准摄像头。</p>
+      <div class="manual-isbn">
+        <input id="manualIsbnInput" inputmode="numeric" placeholder="摄像头不可用时手动输入 ISBN">
+        <button id="manualIsbnButton">查询</button>
+      </div>
+    </dialog>
+
+    <template id="bookCardTemplate">
+      <article class="book-card">
+        <button class="cover-button">
+          <img class="cover" alt="">
+        </button>
+        <div class="book-info">
+          <button class="book-title"></button>
+          <p class="authors"></p>
+          <p class="publisher"></p>
+          <p class="identifier"></p>
+          <div class="status-row">
+            <button class="status-chip ownership-chip"></button>
+            <button class="status-chip reading-chip"></button>
+            <span class="spacer"></span>
+            <span class="date-stack">
+              <strong class="pending-days"></strong>
+              <span class="added-date"></span>
+            </span>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
